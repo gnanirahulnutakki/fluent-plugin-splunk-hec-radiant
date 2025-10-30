@@ -1,4 +1,4 @@
-require:
+plugins:
   - rubocop-rspec
 
 AllCops:
@@ -27,13 +27,16 @@ Metrics/BlockLength:
     - '**/*.gemspec'
 
 Metrics/MethodLength:
-  Max: 25
+  Max: 40
 
 Metrics/AbcSize:
-  Max: 30
+  Max: 45
 
 Metrics/CyclomaticComplexity:
-  Max: 10
+  Max: 20
+
+Metrics/PerceivedComplexity:
+  Max: 20
 
 RSpec/MultipleExpectations:
   Max: 5
@@ -48,4 +51,14 @@ Style/Documentation:
   Enabled: false
 
 Metrics/ClassLength:
-  Max: 300
+  Max: 450
+
+Naming/FileName:
+  Exclude:
+    - 'lib/fluent-plugin-splunk-hec-radiant.rb'
+
+Style/GlobalVars:
+  Enabled: false
+
+Gemspec/DevelopmentDependencies:
+  Enabled: false

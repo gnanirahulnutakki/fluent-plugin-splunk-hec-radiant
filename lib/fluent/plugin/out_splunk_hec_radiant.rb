@@ -174,7 +174,10 @@ module Fluent
 
       def configure(conf)
         super
-        raise Fluent::ConfigError, "One of `hec_host` or `full_url` is required." if @hec_host.empty? && @full_url.empty?
+        if @hec_host.empty? && @full_url.empty?
+          raise Fluent::ConfigError,
+                "One of `hec_host` or `full_url` is required."
+        end
 
         check_conflict
         check_metric_configs
@@ -261,8 +264,14 @@ module Fluent
 
         return if @metrics_from_event
 
-        raise Fluent::ConfigError, "`metric_name_key` is required when `metrics_from_event` is `false`." unless @metric_name_key
-        raise Fluent::ConfigError, "`metric_value_key` is required when `metric_name_key` is set." unless @metric_value_key
+        unless @metric_name_key
+          raise Fluent::ConfigError,
+                "`metric_name_key` is required when `metrics_from_event` is `false`."
+        end
+        return if @metric_value_key
+
+        raise Fluent::ConfigError,
+              "`metric_value_key` is required when `metric_name_key` is set."
       end
 
       def prepare_key_fields
@@ -293,14 +302,14 @@ module Fluent
       def configure_fields(conf)
         # This loop looks dumb, but it is used to suppress the unused parameter configuration warning
         conf.elements.select { |element| element.name == "fields" }.each do |element|
-          element.each_pair { |k, _v| element.has_key?(k) }
+          element.each_pair { |k, _v| element.key?(k) }
         end
 
         return unless @fields
 
-        @extra_fields = @fields.corresponding_config_element.map do |k, v|
+        @extra_fields = @fields.corresponding_config_element.to_h do |k, v|
           [k, v.empty? ? k : v]
-        end.to_h
+        end
       end
 
       def pick_custom_format_method
@@ -329,15 +338,15 @@ module Fluent
           %i[host index source sourcetype].each { |field| p.delete field if p[field].nil? }
 
           if @extra_fields
-            p[:fields] = @extra_fields.map { |name, field| [name, record[field]] }.to_h
+            p[:fields] = @extra_fields.transform_values { |field| record[field] }
             p[:fields].delete_if { |_k, v| v.nil? }
             # if a field is already in indexed fields, then remove it from the original event
-            @extra_fields.values.each { |field| record.delete field }
+            @extra_fields.each_value { |field| record.delete field }
           end
 
           formatter = @formatters.find { |f| f.match? tag }
           record = formatter.format(tag, time, record) if formatter
-          
+
           p[:event] = convert_to_utf8(record)
         end
 
@@ -372,7 +381,7 @@ module Fluent
           }
 
           if @extra_fields
-            fields.update @extra_fields.map { |name, field| [name, record[field]] }.to_h
+            fields.update(@extra_fields.transform_values { |field| record[field] })
             fields.delete_if { |_k, v| v.nil? }
           else
             fields.update record
@@ -394,16 +403,16 @@ module Fluent
 
       def construct_api
         if @full_url.empty?
-          URI("#{@protocol}://#{@hec_host}:#{@hec_port}/#{@hec_endpoint.delete_prefix('/')}")
+          URI("#{@protocol}://#{@hec_host}:#{@hec_port}/#{@hec_endpoint.delete_prefix("/")}")
         else
-          URI("#{@full_url.delete_suffix('/')}/#{@hec_endpoint.delete_prefix('/')}")
+          URI("#{@full_url.delete_suffix("/")}/#{@hec_endpoint.delete_prefix("/")}")
         end
       rescue StandardError
         if @full_url.empty?
           raise Fluent::ConfigError, "hec_host (#{@hec_host}) and/or hec_port (#{@hec_port}) are invalid."
-        else
-          raise Fluent::ConfigError, "full_url (#{@full_url}) is invalid."
         end
+
+        raise Fluent::ConfigError, "full_url (#{@full_url}) is invalid."
       end
 
       def write_to_splunk(chunk)
@@ -437,16 +446,17 @@ module Fluent
 
         @metrics[:status_counter].increment(labels: metric_labels(status: response.code.to_s))
 
-        raise_err = response.code.to_s.start_with?("5") || (!@consume_chunk_on_4xx_errors && response.code.to_s.start_with?("4"))
+        raise_err = response.code.to_s.start_with?("5") ||
+                    (!@consume_chunk_on_4xx_errors && response.code.to_s.start_with?("4"))
 
         # raise Exception to utilize Fluentd output plugin retry mechanism
         raise "Server error (#{response.code}) for POST #{@api}, response: #{response.body}" if raise_err
 
         # For both success response (2xx) we will consume the chunk.
-        unless response.code.to_s.start_with?("2")
-          log.error "#{self.class}: Failed POST to #{@api}, response: #{response.body}"
-          log.debug { "#{self.class}: Failed request body: #{request_body}" }
-        end
+        return if response.code.to_s.start_with?("2")
+
+        log.error "#{self.class}: Failed POST to #{@api}, response: #{response.body}"
+        log.debug { "#{self.class}: Failed request body: #{request_body}" }
       end
 
       def convert_to_utf8(input)
@@ -507,7 +517,8 @@ module Fluent
           write_bytes_histogram: register_metric(::Prometheus::Client::Histogram.new(
                                                    :splunk_output_write_payload_bytes,
                                                    docstring: "The size of the write payload in bytes",
-                                                   buckets: [1024, 23_937, 47_875, 95_750, 191_500, 383_000, 766_000, 1_149_000],
+                                                   buckets: [1024, 23_937, 47_875, 95_750, 191_500, 383_000, 766_000,
+                                                             1_149_000],
                                                    labels: metric_label_keys
                                                  )),
           write_records_histogram: register_metric(::Prometheus::Client::Histogram.new(
@@ -533,10 +544,10 @@ module Fluent
       end
 
       def register_metric(metric)
-        if !@registry.exist?(metric.name)
-          @registry.register(metric)
-        else
+        if @registry.exist?(metric.name)
           @registry.get(metric.name)
+        else
+          @registry.register(metric)
         end
       end
     end

@@ -48,5 +48,6 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "rubocop", "~> 1.60"
   spec.add_development_dependency "rubocop-rspec", "~> 3.0"
   spec.add_development_dependency "simplecov", "~> 0.22"
+  spec.add_development_dependency "test-unit", "~> 3.6"
   spec.add_development_dependency "webmock", "~> 3.23"
 end
