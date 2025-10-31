@@ -1,7 +1,10 @@
 # fluent-plugin-splunk-hec-radiant
 
+[![Gem Version](https://badge.fury.io/rb/fluent-plugin-splunk-hec-radiant.svg)](https://badge.fury.io/rb/fluent-plugin-splunk-hec-radiant)
+[![Downloads](https://img.shields.io/gem/dt/fluent-plugin-splunk-hec-radiant.svg)](https://rubygems.org/gems/fluent-plugin-splunk-hec-radiant)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Ruby](https://img.shields.io/badge/ruby-3.0+-red.svg)](https://www.ruby-lang.org)
+[![CI](https://github.com/gnanirahulnutakki/fluent-plugin-splunk-hec-radiant/actions/workflows/ci.yml/badge.svg)](https://github.com/gnanirahulnutakki/fluent-plugin-splunk-hec-radiant/actions/workflows/ci.yml)
 
 A **modernized and actively maintained** Fluentd output plugin for sending events and metrics to [Splunk](https://www.splunk.com) via the [HTTP Event Collector (HEC) API](http://dev.splunk.com/view/event-collector/SP-CAAAE7F).
 
