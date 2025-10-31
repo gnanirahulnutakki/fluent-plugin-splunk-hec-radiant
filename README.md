@@ -13,9 +13,116 @@ This is a fork of the original [fluent-plugin-splunk-hec](https://github.com/spl
 - ✅ **Ruby 3.x support** (requires Ruby 3.0+)
 - ✅ **Modern dependencies** (Fluentd 1.16+, latest gems)
 - ✅ **Better performance** (using `oj` for JSON instead of `multi_json`)
-- ✅ **Enhanced security** (TLS 1.2+ by default)
+- ✅ **Enhanced security** (TLS 1.2+ by default, custom SSL certificates)
+- ✅ **Bug fixes** from original plugin (see [Fixed Issues](#fixed-issues-from-original-plugin))
 - ✅ **Active maintenance** and bug fixes
 - ✅ **Comprehensive test coverage**
+- ✅ **Production-ready examples** for all major use cases
+
+## Fixed Issues from Original Plugin
+
+This modernized version addresses major issues from the [original plugin's GitHub repository](https://github.com/splunk/fluent-plugin-splunk-hec/issues):
+
+### ✅ Issue #278: Dynamic Index Based on Tag
+**Problem**: The `index` parameter didn't accept `${tag}` variables for dynamic routing.
+
+**Our Fix**: Full support for dynamic placeholders in index configuration.
+```xml
+<match **>
+  @type splunk_hec_radiant
+  index ${tag}  # Works! Routes based on tag
+  <buffer tag>
+    @type memory
+  </buffer>
+</match>
+```
+**Example**: [`examples/dynamic-index.conf`](examples/dynamic-index.conf)
+
+### ✅ Issue #276: Unwanted Time Field in JSON
+**Problem**: Can't exclude the "time" field from JSON output.
+
+**Our Fix**: Set `time_key nil` to completely exclude the time field.
+```xml
+<match **>
+  @type splunk_hec_radiant
+  time_key nil  # Excludes time from event JSON
+</match>
+```
+**Example**: [`examples/exclude-time-field.conf`](examples/exclude-time-field.conf)
+
+### ✅ Issue #271: SSL Certificate Verification Failures
+**Problem**: "certificate verify failed (EE certificate key too weak)" errors.
+
+**Our Fix**:
+- Custom CA certificate support (`ca_file`, `ca_path`)
+- Client certificate authentication (`client_cert`, `client_key`)
+- Better error messages and troubleshooting guidance
+```xml
+<match **>
+  @type splunk_hec_radiant
+  ca_file /path/to/custom-ca.crt
+  client_cert /path/to/client.pem
+  client_key /path/to/client-key.pem
+</match>
+```
+**Example**: [`examples/ssl-advanced.conf`](examples/ssl-advanced.conf)
+
+### ✅ Issue #260: Nested Records in Fields
+**Problem**: Can't access nested record fields for dimensions/metadata.
+
+**Our Fix**: Modern Fluentd 1.16+ supports `$.field.subfield` syntax.
+```xml
+<match kubernetes.**>
+  @type splunk_hec_radiant
+  source ${$.kubernetes.pod_name}
+  <fields>
+    namespace ${$.kubernetes.namespace_name}
+  </fields>
+  <buffer $.kubernetes.namespace_name, $.kubernetes.pod_name>
+    @type memory
+  </buffer>
+</match>
+```
+**Example**: [`examples/nested-fields-kubernetes.conf`](examples/nested-fields-kubernetes.conf)
+
+### ✅ Issue #287: json-jwt Vulnerability (CVE-2023-51774)
+**Problem**: High severity vulnerability in json-jwt dependency.
+
+**Our Fix**: **Not applicable** - our plugin doesn't use `json-jwt` at all. No vulnerable dependencies!
+
+### ✅ Issue #107: SSL Ciphers Configuration
+**Problem**: No documentation for configuring SSL ciphers.
+
+**Our Fix**: Full support with examples for custom cipher suites.
+```xml
+<match **>
+  @type splunk_hec_radiant
+  ssl_ciphers ["ECDHE-RSA-AES256-GCM-SHA384", "AES256-GCM-SHA384"]
+</match>
+```
+**Example**: [`examples/ssl-advanced.conf`](examples/ssl-advanced.conf)
+
+### ✅ Issue #279 & #270: End of Support / Future Development
+**Problem**: Original plugin reached end-of-life. What are the alternatives?
+
+**Our Answer**: **This plugin IS the alternative!**
+- Active maintenance
+- Modern Ruby 3.x support
+- All dependencies updated
+- Regular security updates
+- Bug fixes and enhancements
+
+### ✅ Issue #275: CVEs and Security Vulnerabilities
+**Problem**: Multiple CVEs in dependencies.
+
+**Our Fix**: All dependencies updated to latest secure versions:
+- `fluentd` >= 1.16
+- `net-http-persistent` >= 4.0 (replaced `httpclient`)
+- `oj` ~> 3.16 (replaced `multi_json`)
+- `prometheus-client` >= 2.1.0
+- No known vulnerabilities
+
+See [`GITHUB_ISSUES_ANALYSIS.md`](GITHUB_ISSUES_ANALYSIS.md) for complete issue analysis.
 
 ## Installation
 
