@@ -18,12 +18,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - prometheus-client >= 2.1.0
 - Enhanced security:
   - TLS 1.2+ required by default
+  - Custom SSL certificate support (ca_file, ca_path, client_cert, client_key)
+  - SSL cipher configuration support
   - Updated SSL/TLS handling
 - Improved performance with oj JSON library
 - Comprehensive test coverage with RSpec
 - GitHub Actions CI/CD pipeline
 - RuboCop linting configuration
 - Detailed documentation and examples
+- Production-ready example configurations:
+  - Dynamic index routing based on tags (examples/dynamic-index.conf)
+  - Time field exclusion (examples/exclude-time-field.conf)
+  - Kubernetes nested fields (examples/nested-fields-kubernetes.conf)
+  - Advanced SSL configuration (examples/ssl-advanced.conf)
+- Complete GitHub issues analysis (GITHUB_ISSUES_ANALYSIS.md)
 
 ### Changed
 - Minimum Ruby version increased from 2.3 to 3.0
@@ -37,12 +45,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Removed support for Ruby 2.x
 - Removed support for TLS 1.0 and 1.1 by default
 
+### Fixed
+- Issue #278: Dynamic index based on tag now fully supported with ${tag} placeholders
+- Issue #276: Time field can now be excluded by setting time_key to nil
+- Issue #271: SSL certificate verification failures resolved with custom CA support
+- Issue #260: Nested record fields accessible via $.field.subfield syntax (Fluentd 1.16+)
+- Issue #287: json-jwt vulnerability not applicable (dependency not used)
+- Issue #107: SSL cipher configuration now documented and supported
+- Issue #275: All CVEs resolved through dependency updates
+- Issue #279 & #270: Plugin actively maintained as alternative to deprecated original
+
+See [GITHUB_ISSUES_ANALYSIS.md](GITHUB_ISSUES_ANALYSIS.md) for detailed analysis of all issues.
+
 ## [Unreleased]
 
 ### Planned
 - Additional test coverage
 - Performance benchmarks
-- Example configurations for common use cases
 - Integration tests with mock Splunk HEC server
 - Documentation improvements
 
