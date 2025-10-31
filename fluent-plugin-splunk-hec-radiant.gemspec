@@ -6,7 +6,7 @@ Gem::Specification.new do |spec|
   spec.name = "fluent-plugin-splunk-hec-radiant"
   spec.version = Fluent::Plugin::SplunkHecRadiant::VERSION
   spec.authors = ["G. Rahul Nutakki"]
-  spec.email = ["your.email@example.com"]
+  spec.email = ["gnanirn@gmail.com"]
 
   spec.summary = "Modernized Fluentd output plugin for Splunk HEC"
   spec.description = "A modernized and actively maintained Fluentd output plugin for " \
