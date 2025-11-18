@@ -31,7 +31,7 @@ module Fluent
   module Plugin
     # Modernized Splunk HEC output plugin
     class SplunkHecRadiantOutput < Fluent::Plugin::Output
-      Fluent::Plugin.register_output("splunk_hec_radiant", self)
+      Fluent::Plugin.register_output("splunk_hec", self)
 
       helpers :formatter
 
