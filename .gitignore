@@ -16,3 +16,6 @@ mkmf.log
 .rspec_status
 .DS_Store
 Gemfile.lock
+checksums.yaml.gz
+data.tar.gz
+metadata.gz
